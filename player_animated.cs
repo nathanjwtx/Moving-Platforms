@@ -20,7 +20,8 @@ public class player_animated : KinematicBody2D
 
     private void GetInput()
     {
-        // Velocity.x = 0;
+        // resets Velocity.x each frame to ensure a set movement
+        Velocity.x = 0;
         bool keyJump = Input.IsActionJustPressed("ui_jump");
         bool keyRight = Input.IsActionPressed("ui_right");
         bool keyLeft = Input.IsActionPressed("ui_left");
@@ -33,6 +34,12 @@ public class player_animated : KinematicBody2D
             Jumping = true;
             Velocity.y = JumpSpeed;
             _animation.Play("jump_up");
+        }
+        if (keyRight)
+        {
+            Jumping = false;
+            _animation.Play("run");
+            Velocity.x += RunSpeed;
         }
     }
 
