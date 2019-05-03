@@ -51,6 +51,7 @@
   <ItemGroup>
     <Compile Include="MovingPlatform.cs" />
     <Compile Include="player.cs" />
+    <Compile Include="player_animated.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

@@ -1,6 +1,6 @@
 [gd_scene load_steps=7 format=2]
 
-[ext_resource path="res://player.tscn" type="PackedScene" id=1]
+[ext_resource path="res://player_animated.tscn" type="PackedScene" id=1]
 [ext_resource path="res://sandCliff_large.png" type="Texture" id=2]
 [ext_resource path="res://movingPlatform - diagonal.tscn" type="PackedScene" id=3]
 [ext_resource path="res://movingPlatform - vertical.tscn" type="PackedScene" id=4]
@@ -11,8 +11,9 @@ extents = Vector2( 190, 65.4066 )
 
 [node name="Node2D" type="Node2D"]
 
-[node name="Player" parent="." instance=ExtResource( 1 )]
-position = Vector2( 160, 277 )
+[node name="Player_Animated" parent="." instance=ExtResource( 1 )]
+position = Vector2( 175, 293 )
+Gravity = 1200
 JumpSpeed = -600
 RunSpeed = 300
 
