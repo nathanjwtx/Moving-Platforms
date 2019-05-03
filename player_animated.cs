@@ -41,7 +41,8 @@ public class player_animated : KinematicBody2D
         {
             Jumping = false;
             _animation.Play("run");
-            // FlipH ensures sprite is facing correct direction if only one animation
+            /* FlipH ensures sprite is facing correct direction if only one animation
+            not needed if a left and a right animation */
             _sprite.FlipH = false;
             Velocity.x += RunSpeed;
         }
