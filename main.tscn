@@ -1,0 +1,43 @@
+[gd_scene load_steps=7 format=2]
+
+[ext_resource path="res://player.tscn" type="PackedScene" id=1]
+[ext_resource path="res://sandCliff_large.png" type="Texture" id=2]
+[ext_resource path="res://MovingPlatform - Diagonal.tscn" type="PackedScene" id=3]
+[ext_resource path="res://MovingPlatform - Vertical.tscn" type="PackedScene" id=4]
+[ext_resource path="res://MovingPlatform - Horizontal.tscn" type="PackedScene" id=5]
+
+[sub_resource type="RectangleShape2D" id=1]
+extents = Vector2( 190, 65.4066 )
+
+[node name="Node2D" type="Node2D"]
+
+[node name="Player" parent="." instance=ExtResource( 1 )]
+position = Vector2( 248, 249 )
+JumpSpeed = -600
+RunSpeed = 300
+
+[node name="Static Platform" type="KinematicBody2D" parent="."]
+editor/display_folded = true
+collision_layer = 2
+
+[node name="Sprite" type="Sprite" parent="Static Platform"]
+position = Vector2( 192, 549.5 )
+scale = Vector2( 1, 0.710938 )
+texture = ExtResource( 2 )
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Static Platform"]
+position = Vector2( 192, 549.5 )
+scale = Vector2( 1, 0.710938 )
+shape = SubResource( 1 )
+
+[node name="MovingDiagonal" parent="." instance=ExtResource( 3 )]
+position = Vector2( 388, 136 )
+Platform_Speed = 20
+
+[node name="Moving Vertical" parent="." instance=ExtResource( 4 )]
+position = Vector2( 320, -99 )
+Platform_Speed = 40
+
+[node name="MovingHorizantal" parent="." instance=ExtResource( 5 )]
+position = Vector2( -107, 0 )
+Platform_Speed = 20
