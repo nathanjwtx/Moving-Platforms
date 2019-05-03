@@ -11,11 +11,13 @@ public class player_animated : KinematicBody2D
     private Vector2 _Snap = new Vector2();
     private bool Jumping;
     private AnimationPlayer _animation;
+    private Sprite _sprite;
 
     // Called when the node enters the scene tree for the first time.
     public override void _Ready()
     {
         _animation = GetNode<AnimationPlayer>("AnimationPlayer");
+        _sprite = GetNode<Sprite>("Sprite");
     }
 
     private void GetInput()
@@ -39,7 +41,16 @@ public class player_animated : KinematicBody2D
         {
             Jumping = false;
             _animation.Play("run");
+            // FlipH ensures sprite is facing correct direction if only one animation
+            _sprite.FlipH = false;
             Velocity.x += RunSpeed;
+        }
+        if (keyLeft)
+        {
+            Jumping = false;
+            _animation.Play("run");
+            _sprite.FlipH = true;
+            Velocity.x -= RunSpeed;
         }
     }
 
