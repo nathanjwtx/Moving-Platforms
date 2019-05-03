@@ -30,16 +30,21 @@ public class player_animated : KinematicBody2D
 
         bool idle = !keyRight && !keyLeft;
 
+        // resets animation to idle when stood on floor not moving
+        if (idle && IsOnFloor())
+        {
+            _animation.Play("idle");
+        }
+
         if (keyJump && IsOnFloor())
         {
-            GD.Print("jump");
             Jumping = true;
             Velocity.y = JumpSpeed;
             _animation.Play("jump_up");
         }
         if (keyRight)
         {
-            Jumping = false;
+            // Jumping = false; // this will prevent jumping whilst moving
             _animation.Play("run");
             /* FlipH ensures sprite is facing correct direction if only one animation
             not needed if a left and a right animation */
@@ -48,7 +53,6 @@ public class player_animated : KinematicBody2D
         }
         if (keyLeft)
         {
-            Jumping = false;
             _animation.Play("run");
             _sprite.FlipH = true;
             Velocity.x -= RunSpeed;
