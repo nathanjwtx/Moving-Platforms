@@ -90,9 +90,11 @@ public class player_animated : KinematicBody2D
     }
     public override void _PhysicsProcess(float delta)
     {
-        GetInput();
-
+        // set gravity
         Velocity.y += Gravity * delta;
+
+        // GetInput() could be included in this function rather than its own
+        GetInput();
         
         // changing value of snap vector to (0, 0) allows player to jump
         if (CurrentState == State.JUMP && IsOnFloor())
