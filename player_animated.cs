@@ -34,7 +34,7 @@ public class player_animated : KinematicBody2D
     {
         // resets Velocity.x each frame to ensure a set movement
         Velocity.x = 0;
-        bool keyJump = Input.IsActionPressed("ui_jump");
+        bool keyJump = Input.IsActionJustPressed("ui_jump");
         bool keyRight = Input.IsActionPressed("ui_right");
         bool keyLeft = Input.IsActionPressed("ui_left");
 
@@ -55,6 +55,7 @@ public class player_animated : KinematicBody2D
         }
         if (keyRight)
         {
+            // SetCurrentState(State.RUN);
             _animation.Play("run");
             /* FlipH ensures sprite is facing correct direction if only one animation
             not needed if a left and a right animation */
@@ -71,15 +72,17 @@ public class player_animated : KinematicBody2D
 
     public void SetCurrentState(State state)
     {
+        CurrentState = state;
         switch (state)
         {
             case State.JUMP:
-                CurrentState = State.JUMP;
                 _animation.Play("jump_up");
                 break;
             case State.IDLE:
-                CurrentState = State.IDLE;
                 _animation.Play("idle");
+                break;
+            case State.RUN:
+                _animation.Play("run");
                 break;
             default:
                 break;
@@ -102,15 +105,23 @@ public class player_animated : KinematicBody2D
         }
 
         // testing value of Velocity.y determines direction of jump
-        if (Velocity.y < 0 && !IsOnFloor())
+        if (Velocity.y < 0 && CurrentState == State.JUMP)
         {
             _animation.Play("jump_up");
         }
-        else if (Velocity.y > 0 && !IsOnFloor())
+        else if (Velocity.y > 0 && CurrentState == State.JUMP)
         {
             _animation.Play("jump_down");
         }
 
         Velocity = MoveAndSlideWithSnap(Velocity, _Snap, Vector2.Up);
+
+        // cancels out the JUMP state/animation once landed on floor after the move
+        if (CurrentState == State.JUMP && IsOnFloor())
+        {
+            SetCurrentState(State.IDLE);
+        }
+
+        
     }
 }
