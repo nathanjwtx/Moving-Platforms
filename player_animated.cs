@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using static Godot.GD;
 
 public class player_animated : KinematicBody2D
 {
@@ -13,18 +14,27 @@ public class player_animated : KinematicBody2D
     private AnimationPlayer _animation;
     private Sprite _sprite;
 
-    // Called when the node enters the scene tree for the first time.
+    public State CurrentState { get; set; }
+
+    public enum State
+    {
+        IDLE,
+        RUN,
+        JUMP
+    }
+
     public override void _Ready()
     {
         _animation = GetNode<AnimationPlayer>("AnimationPlayer");
         _sprite = GetNode<Sprite>("Sprite");
+        SetCurrentState(State.IDLE);
     }
 
     private void GetInput()
     {
         // resets Velocity.x each frame to ensure a set movement
         Velocity.x = 0;
-        bool keyJump = Input.IsActionJustPressed("ui_jump");
+        bool keyJump = Input.IsActionPressed("ui_jump");
         bool keyRight = Input.IsActionPressed("ui_right");
         bool keyLeft = Input.IsActionPressed("ui_left");
 
@@ -34,17 +44,17 @@ public class player_animated : KinematicBody2D
         if (idle && IsOnFloor())
         {
             _animation.Play("idle");
+            SetCurrentState(State.IDLE);
         }
 
         if (keyJump && IsOnFloor())
         {
-            Jumping = true;
+            SetCurrentState(State.JUMP);
             Velocity.y = JumpSpeed;
             _animation.Play("jump_up");
         }
         if (keyRight)
         {
-            // Jumping = false; // this will prevent jumping whilst moving
             _animation.Play("run");
             /* FlipH ensures sprite is facing correct direction if only one animation
             not needed if a left and a right animation */
@@ -59,20 +69,46 @@ public class player_animated : KinematicBody2D
         }
     }
 
+    public void SetCurrentState(State state)
+    {
+        switch (state)
+        {
+            case State.JUMP:
+                CurrentState = State.JUMP;
+                _animation.Play("jump_up");
+                break;
+            case State.IDLE:
+                CurrentState = State.IDLE;
+                _animation.Play("idle");
+                break;
+            default:
+                break;
+        }
+    }
     public override void _PhysicsProcess(float delta)
     {
         GetInput();
 
         Velocity.y += Gravity * delta;
-        if (Jumping && IsOnFloor())
+        
+        // changing value of snap vector to (0, 0) allows player to jump
+        if (CurrentState == State.JUMP && IsOnFloor())
         {
-            Jumping = false;
             _Snap = new Vector2(0, 0);
         }
         else
         {
-            Jumping = false;
             _Snap = new Vector2(0, 40);
+        }
+
+        // testing value of Velocity.y determines direction of jump
+        if (Velocity.y < 0 && !IsOnFloor())
+        {
+            _animation.Play("jump_up");
+        }
+        else if (Velocity.y > 0 && !IsOnFloor())
+        {
+            _animation.Play("jump_down");
         }
 
         Velocity = MoveAndSlideWithSnap(Velocity, _Snap, Vector2.Up);
