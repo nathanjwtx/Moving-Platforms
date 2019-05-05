@@ -16,6 +16,8 @@ public class player_animated : KinematicBody2D
 
     public State CurrentState { get; set; }
 
+    private string _anim { get; set; }
+
     public enum State
     {
         IDLE,
@@ -39,34 +41,39 @@ public class player_animated : KinematicBody2D
         bool keyLeft = Input.IsActionPressed("ui_left");
 
         bool idle = !keyRight && !keyLeft;
-
         // resets animation to idle when stood on floor not moving
         if (idle && IsOnFloor())
         {
-            _animation.Play("idle");
             SetCurrentState(State.IDLE);
         }
-
-        if (keyJump && IsOnFloor())
+        else if (keyRight)
         {
-            SetCurrentState(State.JUMP);
-            Velocity.y = JumpSpeed;
-            _animation.Play("jump_up");
-        }
-        if (keyRight)
-        {
-            // SetCurrentState(State.RUN);
-            _animation.Play("run");
+            SetCurrentState(State.RUN);
             /* FlipH ensures sprite is facing correct direction if only one animation
             not needed if a left and a right animation */
             _sprite.FlipH = false;
             Velocity.x += RunSpeed;
         }
-        if (keyLeft)
+        else if (keyLeft)
         {
-            _animation.Play("run");
-            _sprite.FlipH = true;
-            Velocity.x -= RunSpeed;
+                SetCurrentState(State.RUN);
+                _sprite.FlipH = true;
+                Velocity.x -= RunSpeed;
+
+        }
+
+        if (IsOnFloor())
+        {
+            if (keyJump)
+            {
+                SetCurrentState(State.JUMP);
+                Velocity.y = JumpSpeed;
+                Velocity.x -= RunSpeed;
+            }
+        }
+        else
+        {
+            SetCurrentState(State.JUMP);
         }
     }
 
@@ -76,20 +83,33 @@ public class player_animated : KinematicBody2D
         switch (state)
         {
             case State.JUMP:
-                _animation.Play("jump_up");
+                if (Velocity.y < 0)
+                {
+                    _anim = "jump_up";
+                }
+                else if (Velocity.y > 0)
+                {
+                    _anim = "jump_down";
+                }
+                // _animation.Play("jump_up");
                 break;
             case State.IDLE:
-                _animation.Play("idle");
+                _anim = "idle";
+                // _animation.Play("idle");
                 break;
             case State.RUN:
-                _animation.Play("run");
+                _anim = "run";
+                // _animation.Play("run");
                 break;
             default:
                 break;
         }
+        _animation.Play(_anim);
     }
     public override void _PhysicsProcess(float delta)
     {
+
+        // Print(CurrentState);
         // set gravity
         Velocity.y += Gravity * delta;
 
@@ -107,13 +127,9 @@ public class player_animated : KinematicBody2D
         }
 
         // testing value of Velocity.y determines direction of jump
-        if (Velocity.y < 0 && CurrentState == State.JUMP)
+        if (Velocity.y != 0 && CurrentState == State.JUMP)
         {
-            _animation.Play("jump_up");
-        }
-        else if (Velocity.y > 0 && CurrentState == State.JUMP)
-        {
-            _animation.Play("jump_down");
+            SetCurrentState(State.JUMP);
         }
 
         Velocity = MoveAndSlideWithSnap(Velocity, _Snap, Vector2.Up);
