@@ -7,6 +7,7 @@ public class player_animated : KinematicBody2D
     [Export] public int Gravity;
     [Export] public int JumpSpeed;
     [Export] public int RunSpeed;
+    [Export] public int Acceleration;
 
     private Vector2 Velocity = new Vector2();
     private Vector2 _Snap = new Vector2();
@@ -38,8 +39,10 @@ public class player_animated : KinematicBody2D
 
     private void GetInput()
     {
-        // resets Velocity.x each frame to ensure a set movement
-        Velocity.x = 0;
+        /* resets Velocity.x each frame to ensure a set movement if using
+        Velocity.x += RunSpeed rather than Math.Min(...)
+        */
+        // Velocity.x = 0;
         bool keyJump = Input.IsActionJustPressed("ui_jump");
         bool keyRight = Input.IsActionPressed("ui_right");
         bool keyLeft = Input.IsActionPressed("ui_left");
@@ -49,6 +52,10 @@ public class player_animated : KinematicBody2D
         if (idle && IsOnFloor()) // resets animation to idle when stood on floor not moving
         {
             SetCurrentState(State.IDLE);
+            /* resets Velocity.x when not moving
+                if left at the top of the method, Velocity.x never gets above Acceleration as it gets reset
+            */
+            Velocity.x = 0;
         }
         else if (keyRight)
         {
@@ -56,13 +63,13 @@ public class player_animated : KinematicBody2D
             /* FlipH ensures sprite is facing correct direction if only one animation
             not needed if a left and a right animation */
             _sprite.FlipH = false;
-            Velocity.x += RunSpeed;
+            Velocity.x = Math.Min(Velocity.x + Acceleration, RunSpeed);
         }
         else if (keyLeft)
         {
             SetCurrentState(State.RUN);
             _sprite.FlipH = true;
-            Velocity.x -= RunSpeed;
+            Velocity.x = Math.Max(Velocity.x - Acceleration, -RunSpeed);
         }
 
         // controls jumping
@@ -72,7 +79,7 @@ public class player_animated : KinematicBody2D
             {
                 SetCurrentState(State.JUMP);
                 Velocity.y = JumpSpeed;
-                Velocity.x -= RunSpeed;
+                // Velocity.x -= RunSpeed;
             }
         }
         else

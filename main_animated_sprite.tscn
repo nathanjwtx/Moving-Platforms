@@ -12,10 +12,11 @@ extents = Vector2( 190, 65.4066 )
 [node name="Node2D" type="Node2D"]
 
 [node name="Player_Animated" parent="." instance=ExtResource( 1 )]
-position = Vector2( 175, 65 )
+position = Vector2( 139, 291 )
 Gravity = 1200
 JumpSpeed = -600
 RunSpeed = 300
+Acceleration = 50
 
 [node name="Static Platform" type="KinematicBody2D" parent="."]
 editor/display_folded = true
