@@ -55,7 +55,10 @@ public class player_animated : KinematicBody2D
             /* resets Velocity.x when not moving
                 if left at the top of the method, Velocity.x never gets above Acceleration as it gets reset
             */
-            Velocity.x = 0;
+            // Velocity.x = 0;
+
+            // Lerp slows down over a period of time. In this instance essentially decelerating to 0
+            Velocity.x = Mathf.Lerp(Velocity.x, 0, 0.2f);
         }
         else if (keyRight)
         {
@@ -119,6 +122,12 @@ public class player_animated : KinematicBody2D
     }
     public override void _PhysicsProcess(float delta)
     {
+        // reset player if falls off a platform
+        if (Velocity.y > 1000)
+        {
+            Position = new Vector2(140, 290);
+        }
+
         Velocity.y += Gravity * delta;
 
         // GetInput() could be included in this function rather than its own
