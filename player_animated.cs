@@ -1,162 +1,157 @@
-using Godot;
 using System;
-using static Godot.GD;
+using Godot;
 
-public class player_animated : KinematicBody2D
+namespace MovingPlatforms
 {
-    [Export] public int Gravity;
-    [Export] public int JumpSpeed;
-    [Export] public int RunSpeed;
-    [Export] public int Acceleration;
-
-    private Vector2 Velocity = new Vector2();
-    private Vector2 _Snap = new Vector2();
-    private bool Jumping;
-    private AnimationPlayer _animation;
-    private Sprite _sprite;
-
-    public State CurrentState { get; set; }
-
-    private string _anim { get; set; }
-
-    public enum State
+    public class player_animated : KinematicBody2D
     {
-        IDLE,
-        RUN,
-        JUMP
-    }
+        [Export] public int Gravity;
+        [Export] public int JumpSpeed;
+        [Export] public int RunSpeed;
+        [Export] public int Acceleration;
 
-    public override void _Ready()
-    {
-        // set values of _animation and _sprite once when scene loaded
-        _animation = GetNode<AnimationPlayer>("AnimationPlayer");
-        _sprite = GetNode<Sprite>("Sprite");
+        private Vector2 _velocity;
+        private Vector2 _snap;
+        private bool _friction;
+        private AnimationPlayer _animation;
+        private Sprite _sprite;
 
-        /* removing line below makes player jump animation run if starts in the air
-        else player will fall running the idle animation */
-        // SetCurrentState(State.IDLE);
-    }
+        private State CurrentState { get; set; }
 
-    private void GetInput()
-    {
-        /* resets Velocity.x each frame to ensure a set movement if using
-        Velocity.x += RunSpeed rather than Math.Min(...)
-        */
-        // Velocity.x = 0;
-        bool keyJump = Input.IsActionJustPressed("ui_jump");
-        bool keyRight = Input.IsActionPressed("ui_right");
-        bool keyLeft = Input.IsActionPressed("ui_left");
+        private string Anim { get; set; }
 
-        bool idle = !keyRight && !keyLeft;
-        
-        if (idle && IsOnFloor()) // resets animation to idle when stood on floor not moving
+        public enum State
         {
-            SetCurrentState(State.IDLE);
-            /* resets Velocity.x when not moving
-                if left at the top of the method, Velocity.x never gets above Acceleration as it gets reset
+            IDLE,
+            RUN,
+            JUMP
+        }
+
+        public override void _Ready()
+        {
+            // set values of _animation and _sprite once when scene loaded
+            _animation = GetNode<AnimationPlayer>("AnimationPlayer");
+            _sprite = GetNode<Sprite>("Sprite");
+
+            /* removing line below makes player jump animation run if starts in the air
+            else player will fall running the idle animation */
+            // SetCurrentState(State.IDLE);
+        }
+
+        private void GetInput()
+        {
+            /* resets _velocity.x each frame to ensure a set movement if using
+            _velocity.x += RunSpeed rather than Math.Min(...)
             */
             // Velocity.x = 0;
+            bool keyJump = Input.IsActionJustPressed("ui_jump");
+            bool keyRight = Input.IsActionPressed("ui_right");
+            bool keyLeft = Input.IsActionPressed("ui_left");
 
-            // Lerp slows down over a period of time. In this instance essentially decelerating to 0
-            Velocity.x = Mathf.Lerp(Velocity.x, 0, 0.2f);
-        }
-        else if (keyRight)
-        {
-            SetCurrentState(State.RUN);
-            /* FlipH ensures sprite is facing correct direction if only one animation
-            not needed if a left and a right animation */
-            _sprite.FlipH = false;
-            Velocity.x = Math.Min(Velocity.x + Acceleration, RunSpeed);
-        }
-        else if (keyLeft)
-        {
-            SetCurrentState(State.RUN);
-            _sprite.FlipH = true;
-            Velocity.x = Math.Max(Velocity.x - Acceleration, -RunSpeed);
-        }
+            bool idle = !keyRight && !keyLeft;
+        
+            if (idle && IsOnFloor()) // resets animation to idle when stood on floor not moving
+            {
+                SetCurrentState(State.IDLE);
+                /* resets _velocity.x when not moving
+                if left at the top of the method, _velocity.x never gets above Acceleration as it gets reset
+                */
+                // _velocity.x = 0;
 
-        // controls jumping
-        if (IsOnFloor())
-        {
-            if (keyJump)
+                // Lerp slows down over a period of time. In this instance essentially decelerating to 0
+                _velocity.x = Mathf.Lerp(_velocity.x, 0, 0.2f);
+            }
+            else if (keyRight)
+            {
+                SetCurrentState(State.RUN);
+                /* FlipH ensures sprite is facing correct direction if only one animation
+                not needed if a left and a right animation */
+                _sprite.FlipH = false;
+                _velocity.x = Math.Min(_velocity.x + Acceleration, RunSpeed);
+            }
+            else if (keyLeft)
+            {
+                SetCurrentState(State.RUN);
+                _sprite.FlipH = true;
+                _velocity.x = Math.Max(_velocity.x - Acceleration, -RunSpeed);
+            }
+
+            // controls jumping
+            if (IsOnFloor())
+            {
+                if (keyJump)
+                {
+                    SetCurrentState(State.JUMP);
+                    _velocity.y = JumpSpeed;
+                }
+            }
+            else
             {
                 SetCurrentState(State.JUMP);
-                Velocity.y = JumpSpeed;
-                // Velocity.x -= RunSpeed;
             }
         }
-        else
-        {
-            SetCurrentState(State.JUMP);
-        }
-    }
 
-    public void SetCurrentState(State state)
-    {
-        CurrentState = state;
-        switch (state)
+        public void SetCurrentState(State state)
         {
-            case State.JUMP:
-                if (Velocity.y < 0)
-                {
-                    _anim = "jump_up";
-                }
-                else if (Velocity.y > 0)
-                {
-                    _anim = "jump_down";
-                }
-                // _animation.Play("jump_up");
-                break;
-            case State.IDLE:
-                _anim = "idle";
-                // _animation.Play("idle");
-                break;
-            case State.RUN:
-                _anim = "run";
-                // _animation.Play("run");
-                break;
-            default:
-                break;
+            CurrentState = state;
+            switch (state)
+            {
+                case State.JUMP:
+                    if (_velocity.y < 0)
+                    {
+                        Anim = "jump_up";
+                    }
+                    else if (_velocity.y > 0)
+                    {
+                        Anim = "jump_down";
+                    }
+                    break;
+                case State.IDLE:
+                    Anim = "idle";
+                    break;
+                case State.RUN:
+                    Anim = "run";
+                    break;
+            }
+            _animation.Play(Anim);
         }
-        _animation.Play(_anim);
-    }
-    public override void _PhysicsProcess(float delta)
-    {
-        // reset player if falls off a platform
-        if (Velocity.y > 1000)
+    
+        public override void _PhysicsProcess(float delta)
         {
-            Position = new Vector2(140, 290);
-        }
+            // reset player if falls off a platform
+            if (_velocity.y > 1000)
+            {
+                Position = new Vector2(140, 290);
+            }
 
-        Velocity.y += Gravity * delta;
+            _velocity.y += Gravity * delta;
 
-        // GetInput() could be included in this function rather than its own
-        GetInput();
+            // GetInput() functionality could be included in this function rather than its own
+            GetInput();
         
-        // changing value of snap vector to (0, 0) allows player to jump
-        if (CurrentState == State.JUMP && IsOnFloor())
-        {
-            _Snap = new Vector2(0, 0);
-        }
-        else
-        {
-            _Snap = new Vector2(0, 40);
-        }
+            // changing value of snap vector to (0, 0) allows player to jump
+            if (CurrentState == State.JUMP && IsOnFloor())
+            {
+                _snap = new Vector2(0, 0);
+            }
+            else
+            {
+                _snap = new Vector2(0, 40);
+            }
 
-        // testing value of Velocity.y determines direction of jump
-        if (Velocity.y != 0 && CurrentState == State.JUMP)
-        {
-            SetCurrentState(State.JUMP);
+            // testing value of _velocity.y determines direction of jump
+            if (_velocity.y != 0 && CurrentState == State.JUMP)
+            {
+                SetCurrentState(State.JUMP);
+            }
+
+            _velocity = MoveAndSlideWithSnap(_velocity, _snap, Vector2.Up);
+
+            // cancels out the JUMP state/animation once landed on floor after the move
+            if (CurrentState == State.JUMP && IsOnFloor())
+            {
+                SetCurrentState(State.IDLE);
+            }
         }
-
-        Velocity = MoveAndSlideWithSnap(Velocity, _Snap, Vector2.Up);
-
-        // cancels out the JUMP state/animation once landed on floor after the move
-        if (CurrentState == State.JUMP && IsOnFloor())
-        {
-            SetCurrentState(State.IDLE);
-        }
-
-        
     }
 }
