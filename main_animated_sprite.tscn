@@ -12,7 +12,7 @@ extents = Vector2( 190, 65.4066 )
 [node name="Node2D" type="Node2D"]
 
 [node name="Player_Animated" parent="." instance=ExtResource( 1 )]
-position = Vector2( 175, 293 )
+position = Vector2( 175, 65 )
 Gravity = 1200
 JumpSpeed = -600
 RunSpeed = 300

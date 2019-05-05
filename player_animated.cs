@@ -27,9 +27,13 @@ public class player_animated : KinematicBody2D
 
     public override void _Ready()
     {
+        // set values of _animation and _sprite once when scene loaded
         _animation = GetNode<AnimationPlayer>("AnimationPlayer");
         _sprite = GetNode<Sprite>("Sprite");
-        SetCurrentState(State.IDLE);
+
+        /* removing line below makes player jump animation run if starts in the air
+        else player will fall running the idle animation */
+        // SetCurrentState(State.IDLE);
     }
 
     private void GetInput()
@@ -41,8 +45,8 @@ public class player_animated : KinematicBody2D
         bool keyLeft = Input.IsActionPressed("ui_left");
 
         bool idle = !keyRight && !keyLeft;
-        // resets animation to idle when stood on floor not moving
-        if (idle && IsOnFloor())
+        
+        if (idle && IsOnFloor()) // resets animation to idle when stood on floor not moving
         {
             SetCurrentState(State.IDLE);
         }
@@ -56,12 +60,12 @@ public class player_animated : KinematicBody2D
         }
         else if (keyLeft)
         {
-                SetCurrentState(State.RUN);
-                _sprite.FlipH = true;
-                Velocity.x -= RunSpeed;
-
+            SetCurrentState(State.RUN);
+            _sprite.FlipH = true;
+            Velocity.x -= RunSpeed;
         }
 
+        // controls jumping
         if (IsOnFloor())
         {
             if (keyJump)
@@ -108,9 +112,6 @@ public class player_animated : KinematicBody2D
     }
     public override void _PhysicsProcess(float delta)
     {
-
-        // Print(CurrentState);
-        // set gravity
         Velocity.y += Gravity * delta;
 
         // GetInput() could be included in this function rather than its own
