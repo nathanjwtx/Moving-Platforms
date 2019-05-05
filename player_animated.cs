@@ -59,7 +59,9 @@ namespace MovingPlatforms
                 // _velocity.x = 0;
 
                 // Lerp slows down over a period of time. In this instance essentially decelerating to 0
-                _velocity.x = Mathf.Lerp(_velocity.x, 0, 0.2f);
+                // if using friction move this line to the jump controller. replace with friction = true;
+//                _velocity.x = Mathf.Lerp(_velocity.x, 0, 0.2f);
+                _friction = true;
             }
             else if (keyRight)
             {
@@ -84,10 +86,20 @@ namespace MovingPlatforms
                     SetCurrentState(State.JUMP);
                     _velocity.y = JumpSpeed;
                 }
+
+                if (_friction)
+                {
+                    _velocity.x = Mathf.Lerp(_velocity.x, 0, 0.2f);
+                }
             }
             else
             {
                 SetCurrentState(State.JUMP);
+                if (_friction)
+                {
+                    // change the weight to 0.05 to indicate less friction when in the air
+                    _velocity.x = Mathf.Lerp(_velocity.x, 0, 0.05f);
+                }
             }
         }
 
